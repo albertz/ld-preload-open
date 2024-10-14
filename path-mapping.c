@@ -178,22 +178,10 @@ static void path_mapping_deinit()
 #define MAX_PATH 4096
 #endif
 
-// Returns strlen(path) without trailing slashes
-size_t pathlen(const char *path)
-{
-    size_t path_length = strlen(path);
-    while (path_length > 0 && path[path_length - 1] == '/') {
-        // If the prefix ends with a slash ("/example/dir/"), ignore the slash.
-        // Otherwise it would not match the dir itself ("/examle/dir"), e.g. in opendir().
-        path_length -= 1;
-    }
-    return path_length;
-}
-
 // Returns true if the first path components of path match those of prefix (whole word matches only)
 int path_prefix_matches(const char *prefix, const char *path)
 {
-    size_t prefix_len = pathlen(prefix);
+    size_t prefix_len = strlen(prefix);
     if (strncmp(prefix, path, prefix_len) == 0) {
         // The prefix matches, but "/example/dir" would also match "/example/dirty/file"
         // Thus we only return true if a slash or end-of-string follows the match.
@@ -209,7 +197,7 @@ int path_prefix_matches(const char *prefix, const char *path)
 static const char *fix_path(const char *function_name, const char *path, char *new_path, size_t new_path_size)
 {
     if (path == NULL) return path;
-if (path[0] == '\0') return path;
+    if (path[0] == '\0') return path;
 
     char abs_path[MAX_PATH];
     if (path[0] != '/') {
@@ -234,8 +222,8 @@ if (path[0] == '\0') return path;
         const char *prefix = path_map[i][0];
         if (path_prefix_matches(prefix, path)) {
             const char *replace = path_map[i][1];
-            size_t prefix_length = pathlen(prefix);
-            size_t new_length = strlen(path) + pathlen(replace) - prefix_length;
+            size_t prefix_length = strlen(prefix);
+            size_t new_length = strlen(path) + strlen(replace) - prefix_length;
             if (new_length > new_path_size - 1) {
                 error_fprintf(stderr, "ERROR fix_path: Path too long: %s(%s)", function_name, path);
                 return path;
