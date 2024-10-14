@@ -198,7 +198,9 @@ int path_prefix_matches(const char *prefix, const char *path)
         // The prefix matches, but "/example/dir" would also match "/example/dirty/file"
         // Thus we only return true if a slash or end-of-string follows the match.
         char char_after_match = path[prefix_len];
-        return char_after_match == '/' || char_after_match == '\0';
+        if (char_after_match == '/' || char_after_match == '\0') return 1;
+        // Or the prefix itself ends with a slash.
+        if (prefix_len > 0 && path[prefix_len - 1] == '/') return 1;
     }
     return 0;
 }
