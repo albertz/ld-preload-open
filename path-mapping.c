@@ -209,6 +209,26 @@ int path_prefix_matches(const char *prefix, const char *path)
 static const char *fix_path(const char *function_name, const char *path, char *new_path, size_t new_path_size)
 {
     if (path == NULL) return path;
+if (path[0] == '\0') return path;
+
+    char abs_path[MAX_PATH];
+    if (path[0] != '/') {
+        // Make absolute path
+        char cwd[MAX_PATH];
+        if (getcwd(cwd, sizeof cwd) == NULL) {
+            error_fprintf(stderr, "ERROR fix_path: getcwd failed: %s(%s)", function_name, path);
+            return path;
+        }
+        size_t cwd_length = strlen(cwd);
+        if (cwd_length + strlen(path) + 2 > MAX_PATH) {
+            error_fprintf(stderr, "ERROR fix_path: Path too long: %s(%s)", function_name, path);
+            return path;
+        }
+        strcpy(abs_path, cwd);
+        strcat(abs_path, "/");
+        strcat(abs_path, path);
+        path = abs_path;
+    }
 
     for (int i = 0; i < path_map_length; i++) {
         const char *prefix = path_map[i][0];
